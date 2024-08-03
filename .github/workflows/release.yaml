@@ -1,0 +1,38 @@
+name: release
+
+on:
+  workflow_dispatch: {}
+  push:
+    tags:
+      - "*"
+
+jobs:
+  windows-x64-gpu:
+    name: vs2022
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          path: Fairy
+      - name: cache-opencv-mobile
+        id: cache-opencv-mobile
+        uses: actions/cache@v3
+        with:
+          path: ../opencv-mobile
+          key: opencv-mobile-vs2022-v28
+      - name: opencv-mobile
+        if: steps.cache-opencv-mobile.outputs.cache-hit != 'true'
+        run: |
+          Invoke-WebRequest -Uri https://github.com/nihui/opencv-mobile/releases/download/v28/opencv-mobile-4.10.0-windows-vs2022.zip -OutFile opencv-mobile-4.10.0-windows-vs2022.zip
+          7z x ./opencv-mobile-4.10.0-windows-vs2022.zip
+          mv opencv-mobile-4.10.0-windows-vs2022 opencv-mobile
+      - name: build
+        run: |
+          cd Fairy
+          cmake -DRELEASE=ON .
+          cmake --build . --config Release
+          mv Release/zzz.exe Fairy弹刀助手.exe
+      - name: release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: Fairy弹刀助手.exe
