@@ -35,4 +35,4 @@ jobs:
       - name: release
         uses: softprops/action-gh-release@v1
         with:
-          files: Fairy弹刀助手.exe
+          files: Fairy/Fairy弹刀助手.exe
